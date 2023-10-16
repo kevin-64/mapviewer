@@ -1,0 +1,26 @@
+{
+  "name": "mapviewer",
+  "version": "1.0.0",
+  "main": "src/index.tsx",
+  "author": "Kevin Pellegrini",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^18.2.24",
+    "@types/react-dom": "^18.2.8",
+    "html-webpack-plugin": "^5.5.3",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.2.2",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "scripts": {
+    "start": "webpack serve --hot --open --no-client-overlay"
+  },
+  "dependencies": {
+    "@arcgis/core": "^4.27.6",
+    "ol": "^8.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
