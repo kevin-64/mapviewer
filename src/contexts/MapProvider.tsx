@@ -1,7 +1,12 @@
 import React, { useRef, useState, useEffect, ReactElement } from "react"
 import MapContext from "./MapContext";
-import { Map, View } from "ol";
+import { Feature, Map, MapBrowserEvent, View } from "ol";
+import { toLonLat } from 'ol/proj'
 import { Coordinate } from "ol/coordinate";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import { Point } from "ol/geom";
+import axios from "axios";
 
 interface MapProviderProps {
   zoom: number
@@ -23,6 +28,23 @@ const MapProvider = ({ children, zoom, center }: MapProviderProps) => {
     let mapObject = new Map(options);
     mapObject.setTarget(mapRef.current || undefined);
     setMap(mapObject);
+    mapObject.on('click', (e: MapBrowserEvent<any>) => {
+      const lonLat = toLonLat(e.coordinate);
+      console.log(lonLat);
+
+      ;(mapObject.getAllLayers()
+      .filter(l => l.getClassName() === 'feature-layer')[0] as VectorLayer<VectorSource>)!
+      .getSource()!
+      .addFeature(new Feature(new Point(e.coordinate)));
+
+      axios.post('http://localhost:8080/points', {
+        name: 'additional-point',
+        lat: lonLat[1],
+        lng: lonLat[0]
+      }).then(resp => {
+        console.log(resp);
+      });
+    });
     return () => mapObject.setTarget(undefined);
   }, []);
 
