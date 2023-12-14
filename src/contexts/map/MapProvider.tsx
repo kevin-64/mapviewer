@@ -36,7 +36,7 @@ const MapProvider = ({ children, zoom, center }: MapProviderProps) => {
       .filter(l => l.getClassName() === 'feature-layer')[0] as VectorLayer<VectorSource>)!
       .getSource()!
       .addFeature(new Feature(new Point(e.coordinate)));
-
+  
       axios.post('http://localhost:8080/points', {
         name: 'additional-point',
         lat: lonLat[1],

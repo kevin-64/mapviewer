@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import MapContext from "../contexts/MapContext";
+import MapContext from "../contexts/map/MapContext";
 import MVT from 'ol/format/MVT';
 import VectorTileSource from 'ol/source/VectorTile';
 import VectorTileLayer from "ol/layer/VectorTile";

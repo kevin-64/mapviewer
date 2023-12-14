@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import MapContext from "../contexts/MapContext";
+import MapContext from "../contexts/map/MapContext";
 import VectorLayer from "ol/layer/Vector";
 import Style from "ol/style/Style";
 import Fill from "ol/style/Fill";

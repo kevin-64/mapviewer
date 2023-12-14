@@ -1,6 +1,6 @@
 import React from 'react'
 import { fromLonLat } from 'ol/proj';
-import MapProvider from './contexts/MapProvider';
+import MapProvider from './contexts/map/MapProvider';
 import TileLayer from './components/TileLayer';
 import FeatureLayer from './components/FeatureLayer';
 
