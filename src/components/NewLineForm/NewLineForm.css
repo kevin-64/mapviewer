@@ -1,0 +1,13 @@
+.kts-new-line-form {
+  width: 25%;
+  height: 100%;
+  border-top: 1px solid #aaaaaa;
+  border-right: 1px solid #aaaaaa;
+  margin-right: 2px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  backdrop-filter: brightness(50%) blur(5px);
+  -webkit-backdrop-filter: brightness(50%) blur(5px);
+  z-index: 999;
+}

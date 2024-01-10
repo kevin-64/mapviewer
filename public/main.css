@@ -1,3 +1,12 @@
+html, body {
+  height: 100%;
+  margin-left: 0;
+}
+
+#root {
+  height: 100%;
+}
+
 .map {
   width: 100%;
   height: 400px;
@@ -8,10 +17,11 @@
 
 .ol-map {
   min-width: 600px;
-  min-height: 500px;
-  margin: 50px;
+  min-height: 600px;
+  /* margin: 10px; */
   height: 500px;
-  width: "100%";
+  /* width: "100%"; */
+  flex-grow: 1;
   background-color: lightgray;
 }
 .ol-control {

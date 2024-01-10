@@ -1,0 +1,51 @@
+.kts-line-editor {
+  width: 25%;
+  border-top: 1px solid #aaaaaa;
+  border-right: 1px solid #aaaaaa;
+  margin-right: 2px;
+}
+
+.kts-line-editor-collapsed {
+  width: 5%;
+}
+
+.kts-line-editor-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.kts-line-editor-line {
+  font-size: 14px;
+  margin-left: 10px;
+  padding-left: 5px;
+  margin-bottom: 3px;
+  border-radius: 4px;
+  margin-right: 10px;
+  border: 1px solid black;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.kts-line-editor-line:hover {
+  background-color: #dddddd;
+}
+
+.kts-line-editor-current-line {
+  background-color: orange;
+}
+
+.kts-line-editor-current-line:hover {
+  background-color: orangered;
+}
+
+.kts-line-editor-circle {
+  width: 6px;
+  height: 6px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3PX;
+  border-radius: 3px;
+  margin-right: 5px;
+}
