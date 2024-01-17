@@ -10,8 +10,7 @@ import LineContext from "../../contexts/line/LineContext";
 export default function LineEditor() {
   const { popup, setPopup } = useContext(ViewContext)!;
   const [reload, setReload] = useState(false); //signal for refresh
-  const { currentLine, setCurrentLine, removeLine } = useContext(LineContext)!;
-  const [lines, setLines] = useState<Line[]>([]);
+  const { currentLine, setCurrentLine, lines, refreshLines, removeLine } = useContext(LineContext)!;
   const [collapsed, setCollapsed] = useState(true);
 
   const newLine = () => {
@@ -29,13 +28,7 @@ export default function LineEditor() {
   }
 
   useEffect(() => {
-    axios.get('http://localhost:8080/lines').then((res) => {
-      const newLines: Line[] = [];
-      ((res.data) as Line[]).forEach(ln => {
-        newLines.push(ln);
-      })
-      setLines(newLines);
-    });
+    refreshLines();
   }, [popup, reload]);
 
   return (

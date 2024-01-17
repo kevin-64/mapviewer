@@ -6,6 +6,8 @@ export type PointRecord = Omit<Point, 'pointid'>;
 export default interface LineContextType {
   lines: Line[]
   currentLine?: number;
+
+  refreshLines: () => void
   
   addLine: (ln: LineRecord) => void
   updateLine: (ln: LineRecord) => void

@@ -1,14 +1,31 @@
-import React, { PropsWithChildren, useMemo, useState } from "react";
+import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import LineContextType, { LineRecord, PointRecord } from "./LineContextType";
 import LineContext from './LineContext';
 import axios from "axios";
+import { Line } from "ktscore";
 
 export default function LineProvider(props: PropsWithChildren) {
   const [selectedLine, setSelectedLine] = useState<number | undefined>(undefined);
+  const [lines, setLines] = useState<Line[]>([]);
+
+  const loadLines = () => {
+    axios.get('http://localhost:8080/lines').then((res) => {
+      setLines(res.data as Line[]);
+     });
+  }
+
+  useEffect(() => {
+    loadLines();
+  }, []);
+
   const provider = useMemo<LineContextType>(() => {
     return {
-      lines: [],
+      lines,
       currentLine: selectedLine,
+
+      refreshLines: () => {
+        loadLines();
+      },
 
       addLine: (ln: LineRecord) => {
         axios.post('http://localhost:8080/lines', {
@@ -31,7 +48,7 @@ export default function LineProvider(props: PropsWithChildren) {
       addPoint: (pt: PointRecord, pos: number) => {},
       removePoint: (pos: number) => {},
     }
-  }, [selectedLine]);
+  }, [selectedLine, lines]);
 
   return (
     <LineContext.Provider value={provider}>
