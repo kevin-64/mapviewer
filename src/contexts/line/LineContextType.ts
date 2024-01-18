@@ -10,7 +10,7 @@ export default interface LineContextType {
   refreshLines: () => void
   
   addLine: (ln: LineRecord) => void
-  updateLine: (ln: LineRecord) => void
+  updateLine: (ln: Line) => void
   removeLine: (id: number) => void
 
   setCurrentLine: (id?: number) => void

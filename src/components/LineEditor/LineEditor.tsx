@@ -9,8 +9,9 @@ import LineContext from "../../contexts/line/LineContext";
 
 export default function LineEditor() {
   const { popup, setPopup } = useContext(ViewContext)!;
-  const [reload, setReload] = useState(false); //signal for refresh
-  const { currentLine, setCurrentLine, lines, refreshLines, removeLine } = useContext(LineContext)!;
+  const { currentLine, setCurrentLine,
+          lines, refreshLines, 
+          removeLine } = useContext(LineContext)!;
   const [collapsed, setCollapsed] = useState(true);
 
   const newLine = () => {
@@ -19,17 +20,21 @@ export default function LineEditor() {
 
   const selectLine = (id: number) => {
     setCurrentLine(id);
-    console.log(`current line is now ${id}`)
   }
 
   const deleteLine = (id: number) => {
     removeLine(id); 
-    setReload(!reload);
+    refreshLines();
+  }
+
+  const modifyLine = (id: number) => {
+    setPopup(PopupIds.EDIT_LINE);
+    refreshLines();
   }
 
   useEffect(() => {
     refreshLines();
-  }, [popup, reload]);
+  }, [popup]);
 
   return (
     <div className={`kts-line-editor ${collapsed ? 'kts-line-editor-collapsed' : ''}`}>
@@ -48,6 +53,7 @@ export default function LineEditor() {
               <div className="kts-line-editor-circle" style={{background: ln.color}}></div>
               {ln.name}
               <button onClick={() => deleteLine(ln.lineid)}>X</button>
+              <button onClick={() => modifyLine(ln.lineid)}>Edit</button>
             </div>
           )
         })}

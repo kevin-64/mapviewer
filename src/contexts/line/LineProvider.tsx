@@ -34,7 +34,13 @@ export default function LineProvider(props: PropsWithChildren) {
           console.log(resp);
         });
       },
-      updateLine: (ln: LineRecord) => {},
+      updateLine: (ln: Line) => {
+        axios.put(`http://localhost:8080/lines/${ln.lineid}`, {
+          ...ln
+        }).then(resp => {
+          console.log(resp);
+        });
+      },
       removeLine: (id: number) => {
         axios.delete(`http://localhost:8080/lines/${id}`).then(resp => {
           console.log(resp);

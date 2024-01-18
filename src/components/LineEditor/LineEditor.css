@@ -33,6 +33,10 @@
   background-color: #dddddd;
 }
 
+.kts-line-editor-line>button {
+  margin-left: 5px;
+}
+
 .kts-line-editor-current-line {
   background-color: orange;
 }
