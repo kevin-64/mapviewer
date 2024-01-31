@@ -21,7 +21,7 @@ const App = () => {
           <div className="kts-app-container">
             <LineEditor></LineEditor>
             <NewLineForm></NewLineForm>
-            <MapProvider center={fromLonLat([-118.2362, 33.9616])} zoom={11}>
+            <MapProvider center={fromLonLat([-118.2362, 33.9616])} zoom={13}>
                 <TileLayer
                   zIndex={0}
                 />

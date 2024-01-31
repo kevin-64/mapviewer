@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, ReactElement } from "react"
+import React, { useRef, useState, useEffect, ReactElement, useContext } from "react"
 import MapContext from "./MapContext";
 import { Feature, Map, MapBrowserEvent, View } from "ol";
 import { toLonLat } from 'ol/proj'
@@ -6,7 +6,7 @@ import { Coordinate } from "ol/coordinate";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Point } from "ol/geom";
-import axios from "axios";
+import LineContext from "../line/LineContext";
 
 interface MapProviderProps {
   zoom: number
@@ -16,6 +16,7 @@ interface MapProviderProps {
 
 const MapProvider = ({ children, zoom, center }: MapProviderProps) => {
   const mapRef = useRef(null);
+  const { currentLine, setCurrentLine, lines, addPoint } = useContext(LineContext)!;
   const [map, setMap] = useState<Map | undefined>(undefined);
 
   useEffect(() => {
@@ -28,25 +29,38 @@ const MapProvider = ({ children, zoom, center }: MapProviderProps) => {
     let mapObject = new Map(options);
     mapObject.setTarget(mapRef.current || undefined);
     setMap(mapObject);
-    mapObject.on('click', (e: MapBrowserEvent<any>) => {
+    return () => mapObject.setTarget(undefined);
+  }, []);
+
+  useEffect(() => {
+    const listener =  (e: MapBrowserEvent<any>) => {
+      if (!currentLine) return; //only add points to the selected line
+
+      const currLine = lines.find(ln => ln.lineid === currentLine)!;
+      console.log(currLine);
+
       const lonLat = toLonLat(e.coordinate);
       console.log(lonLat);
 
-      ;(mapObject.getAllLayers()
+      ;(map?.getAllLayers()
       .filter(l => l.getClassName() === 'feature-layer')[0] as VectorLayer<VectorSource>)!
       .getSource()!
       .addFeature(new Feature(new Point(e.coordinate)));
   
-      axios.post('http://localhost:8080/points', {
+      addPoint({
         name: 'additional-point',
         lat: lonLat[1],
-        lng: lonLat[0]
-      }).then(resp => {
-        console.log(resp);
+        lng: lonLat[0],
+        lineid: currLine.lineid,
+        direction: false as any, //TODO: allow deciding,
+        request: false, //TODO: allow deciding
+        order: currLine.points[currLine.points.length - 1].order + 1 //TODO: add anywhere);
       });
-    });
-    return () => mapObject.setTarget(undefined);
-  }, []);
+      setCurrentLine(undefined);
+    }
+    map?.on('click', listener);
+    return () => map?.un('click', listener);
+  }, [currentLine]);
 
   useEffect(() => {
     if (!map) return;

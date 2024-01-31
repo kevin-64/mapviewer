@@ -1,16 +1,17 @@
 import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
-import LineContextType, { LineRecord, PointRecord } from "./LineContextType";
+import LineContextType, { LinePointRecord, LineRecord, LineWithPoints } from "./LineContextType";
 import LineContext from './LineContext';
 import axios from "axios";
 import { Line } from "ktscore";
 
 export default function LineProvider(props: PropsWithChildren) {
   const [selectedLine, setSelectedLine] = useState<number | undefined>(undefined);
-  const [lines, setLines] = useState<Line[]>([]);
+  const [poi, setPoi] = useState<number | undefined>(undefined);
+  const [lines, setLines] = useState<LineWithPoints[]>([]);
 
   const loadLines = () => {
     axios.get('http://localhost:8080/lines').then((res) => {
-      setLines(res.data as Line[]);
+      setLines(res.data as LineWithPoints[]);
      });
   }
 
@@ -22,6 +23,11 @@ export default function LineProvider(props: PropsWithChildren) {
     return {
       lines,
       currentLine: selectedLine,
+      pointOfInsertion: poi,
+
+      setPointOfInsertion: (p: number) => {
+        setPoi(p);
+      },
 
       refreshLines: () => {
         loadLines();
@@ -50,8 +56,17 @@ export default function LineProvider(props: PropsWithChildren) {
 
       setCurrentLine: (id?: number) => {
         setSelectedLine(id);
+        setPoi(lines.find(ln => ln.lineid === id)?.points.length);
       },
-      addPoint: (pt: PointRecord, pos: number) => {},
+      addPoint: (pt: LinePointRecord) => {
+        axios.post('http://localhost:8080/points', {
+          ...pt,
+        }).then(resp => {
+          lines.find(ln => ln.lineid === pt.lineid)?.points.splice(pt.order, 0, pt);
+          setSelectedLine(pt.lineid);
+          console.log(resp);
+        });
+      },
       removePoint: (pos: number) => {},
     }
   }, [selectedLine, lines]);

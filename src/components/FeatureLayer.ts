@@ -8,25 +8,53 @@ import Stroke from "ol/style/Stroke";
 import Vector from "ol/source/Vector";
 import { Feature } from "ol";
 import { fromLonLat } from "ol/proj";
-import { Point as OLPoint } from "ol/geom";
-import axios from "axios";
-import { Point as KTSPoint } from 'ktscore';
+import { Point as OLPoint, LineString as OLLineString } from "ol/geom";
+import LineContext from "../contexts/line/LineContext";
+import { PointRecord } from "../contexts/line/LineContextType";
 
+const ptToCoord = (pt: PointRecord) => {
+  return fromLonLat([pt.lng, pt.lat]);
+}
+
+const ptToOLPoint = (pt: PointRecord) => {
+  return new OLPoint(ptToCoord(pt));
+}
+
+const withOpacity = (color: string, opacity: number) => {
+  const opacityStr = '00' + opacity.toString(16);
+  const paddedOpacity = opacityStr.substring(opacityStr.length - 2)
+  return `${color}${paddedOpacity}`;
+}
 
 const FeatureLayer = ({ zIndex = 0 }) => {
   const [source, setSource] = useState<Vector | undefined>(undefined);
+  const { lines, currentLine } = useContext(LineContext)!;
   const map = useContext(MapContext); 
 
   useEffect(() => {
     const src = new Vector();
-    axios.get('http://localhost:8080/points').then((res) => {
-      ((res.data) as KTSPoint[]).forEach(pt => {
-        src.addFeature(new Feature(new OLPoint(fromLonLat([pt.lng, pt.lat]))));
-      })
-    });
-
     setSource(src);
   }, []);
+
+  useEffect(() => {
+    if (!lines.length || !source) return;
+
+    source.clear();
+
+    lines.forEach(ln => {
+      ln.points.forEach((pt, index) => {
+        source!.addFeature(new Feature(ptToOLPoint(pt)));
+        if (pt.order > 1) {
+          const lineFeature = new Feature(new OLLineString([
+            ptToCoord(ln.points[index - 1]), 
+            ptToCoord(pt)
+          ]));
+          lineFeature.setProperties({ fName: ln.lineid })
+          source.addFeature(lineFeature);
+        }
+      });
+    });
+  }, [lines.length, currentLine]);
 
   useEffect(() => {
     if (!map) return;
@@ -34,18 +62,30 @@ const FeatureLayer = ({ zIndex = 0 }) => {
     const featureLayer = new VectorLayer({
       className: 'feature-layer',
       source,
-      style: 
-        new Style({
-         image: new Circle({
-          fill: new Fill({
-            color: 'red'
-          }),
-          stroke: new Stroke({
-            color: 'white',
-          }),
-          radius: 5,
-        }),
-      }),
+      style: function(feature) {
+        const fProps = feature.getProperties();
+        if (!fProps.fName) {
+          return new Style({
+            image: new Circle({
+              fill: new Fill({
+                color: 'red'
+              }),
+              stroke: new Stroke({
+                color: 'white',
+              }),
+              radius: 5,
+            })
+          });
+        } else {
+          const line = lines.find(ln => ln.lineid === fProps.fName);
+          return new Style({
+            stroke: new Stroke({
+              color:  withOpacity(line?.color || '', line?.lineid === currentLine ? 255 : 128),
+              width: 5,
+            })
+          })
+        }
+      }
     });
     map.addLayer(featureLayer);
     featureLayer.setZIndex(1);
@@ -54,7 +94,7 @@ const FeatureLayer = ({ zIndex = 0 }) => {
         map.removeLayer(featureLayer);
       }
     };
-  }, [map]);
+  }, [map, currentLine, lines.length]);
 
   return null;
 };
