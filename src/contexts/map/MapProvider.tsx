@@ -7,6 +7,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Point } from "ol/geom";
 import LineContext from "../line/LineContext";
+import { ZoomSlider, Zoom } from 'ol/control';
 
 interface MapProviderProps {
   zoom: number
@@ -28,6 +29,13 @@ const MapProvider = ({ children, zoom, center }: MapProviderProps) => {
     };
     let mapObject = new Map(options);
     mapObject.setTarget(mapRef.current || undefined);
+
+    const zoomSlider = new ZoomSlider();
+    mapObject.addControl(zoomSlider);
+
+    const z = new Zoom();
+    mapObject.addControl(z);
+
     setMap(mapObject);
     return () => mapObject.setTarget(undefined);
   }, []);
