@@ -8,16 +8,16 @@ import VectorSource from "ol/source/Vector";
 import { Point } from "ol/geom";
 import LineContext from "../line/LineContext";
 import { ZoomSlider, Zoom } from 'ol/control';
+import MapStateContext from "../mapState/MapStateContext";
 
 interface MapProviderProps {
-  zoom: number
-  center: Coordinate
   children: ReactElement | ReactElement[]
 }
 
-const MapProvider = ({ children, zoom, center }: MapProviderProps) => {
+const MapProvider = ({ children }: MapProviderProps) => {
   const mapRef = useRef(null);
   const { currentLine, setCurrentLine, lines, addPoint } = useContext(LineContext)!;
+  const { zoom, center } = useContext(MapStateContext)!; 
   const [map, setMap] = useState<Map | undefined>(undefined);
 
   useEffect(() => {

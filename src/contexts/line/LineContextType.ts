@@ -3,7 +3,7 @@ import { Line, LinePoint, Point } from "ktscore";
 export type LineRecord = Omit<Line, 'lineid'>;
 export type PointRecord = Omit<Point, 'pointid'>;
 export type LinePointRecord = PointRecord & Omit<LinePoint, 'linepointid' | 'pointid'>;
-export type LineWithPoints = Line & { points: LinePointRecord[] }
+export type LineWithPoints = Line & { points: (PointRecord & Omit<LinePoint, 'pointid'>)[]}
 
 export default interface LineContextType {
   lines: LineWithPoints[]
@@ -21,5 +21,6 @@ export default interface LineContextType {
   setCurrentLine: (id?: number) => void
 
   addPoint: (pt: LinePointRecord) => void
+  updatePoint: (pt: LinePoint) => void
   removePoint: (pos: number) => void
 }

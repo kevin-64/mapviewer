@@ -9,6 +9,7 @@ import './App.css';
 import NewLineForm from './components/NewLineForm/NewLineForm';
 import LineProvider from './contexts/line/LineProvider';
 import ViewProvider from './contexts/view/ViewProvider';
+import MapStateProvider from './contexts/mapState/MapStateProvider';
 
 interface AppProps {
 }
@@ -18,16 +19,18 @@ const App = () => {
     <ViewProvider>
       <LineProvider>
         {/* <Blur> */}
+        <MapStateProvider startCenter={fromLonLat([-118.2362, 33.9616])} startZoom={13}>
           <div className="kts-app-container">
             <LineEditor></LineEditor>
             <NewLineForm></NewLineForm>
-            <MapProvider center={fromLonLat([-118.2362, 33.9616])} zoom={13}>
+            <MapProvider>
                 <TileLayer
                   zIndex={0}
                 />
                 <FeatureLayer />
             </MapProvider>      
           </div>
+        </MapStateProvider>
         {/* </Blur> */}
       </LineProvider>
     </ViewProvider>

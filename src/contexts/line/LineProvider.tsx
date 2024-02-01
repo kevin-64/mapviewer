@@ -2,7 +2,7 @@ import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import LineContextType, { LinePointRecord, LineRecord, LineWithPoints } from "./LineContextType";
 import LineContext from './LineContext';
 import axios from "axios";
-import { Line } from "ktscore";
+import { Line, LinePoint } from "ktscore";
 
 export default function LineProvider(props: PropsWithChildren) {
   const [selectedLine, setSelectedLine] = useState<number | undefined>(undefined);
@@ -62,11 +62,12 @@ export default function LineProvider(props: PropsWithChildren) {
         axios.post('http://localhost:8080/points', {
           ...pt,
         }).then(resp => {
-          lines.find(ln => ln.lineid === pt.lineid)?.points.splice(pt.order, 0, pt);
+          lines.find(ln => ln.lineid === pt.lineid)?.points.splice(pt.order, 0, { ...pt, linepointid: resp.data.linepointid });
           setSelectedLine(pt.lineid);
           console.log(resp);
         });
       },
+      updatePoint: (pt: LinePoint) => {},
       removePoint: (pos: number) => {},
     }
   }, [selectedLine, lines]);
