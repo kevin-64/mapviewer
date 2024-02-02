@@ -62,13 +62,22 @@ export default function LineProvider(props: PropsWithChildren) {
         axios.post('http://localhost:8080/points', {
           ...pt,
         }).then(resp => {
-          lines.find(ln => ln.lineid === pt.lineid)?.points.splice(pt.order, 0, { ...pt, linepointid: resp.data.linepointid });
+          lines.find(ln => ln.lineid === pt.lineid)?.points.splice(pt.order, 0, { ...pt, linepointid: resp.data });
           setSelectedLine(pt.lineid);
           console.log(resp);
         });
       },
       updatePoint: (pt: LinePoint) => {},
-      removePoint: (pos: number) => {},
+      removePoint: (pos: number) => {
+        const selLine = lines.find(ln => ln.lineid === selectedLine)!
+        const lineId = selLine.lineid;
+        const linepointid = selLine.points[pos].linepointid;
+        axios.delete(`http://localhost:8080/linepoints/${linepointid}`).then(resp => {
+          lines.find(ln => ln.lineid === lineId)?.points.splice(pos, 1);
+          setSelectedLine(lineId);
+          console.log(resp);
+        })
+      },
     }
   }, [selectedLine, lines]);
 

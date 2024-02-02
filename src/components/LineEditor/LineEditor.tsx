@@ -47,6 +47,11 @@ export default function LineEditor() {
     //TODO
   }
 
+  const deletePoint = (pos: number) => {
+    removePoint(pos);
+    setCurrentLine(undefined);
+  }
+
   useEffect(() => {
     refreshLines();
   }, [popup]);
@@ -84,7 +89,10 @@ export default function LineEditor() {
                  onClick={() => selectPoint(index)}>
                   <div className="kts-line-editor-circle" style={{background: currentLineObj!.color}}></div>
                   {pt.name}
-                  <button onClick={() => removePoint(index)}>X</button>
+                  <button onClick={(e) => {
+                    deletePoint(index);
+                    e.stopPropagation();
+                  }}>X</button>
                   <button onClick={() => modifyPoint(index)}>Edit</button>
                 </div>
               )

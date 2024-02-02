@@ -44,7 +44,7 @@ const FeatureLayer = ({ zIndex = 0 }) => {
     lines.forEach(ln => {
       ln.points.forEach((pt, index) => {
         source!.addFeature(new Feature(ptToOLPoint(pt)));
-        if (pt.order > 1) {
+        if (index > 0) {
           const lineFeature = new Feature(new OLLineString([
             ptToCoord(ln.points[index - 1]), 
             ptToCoord(pt)
