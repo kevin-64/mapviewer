@@ -10,6 +10,7 @@ import NewLineForm from './components/NewLineForm/NewLineForm';
 import LineProvider from './contexts/line/LineProvider';
 import ViewProvider from './contexts/view/ViewProvider';
 import MapStateProvider from './contexts/mapState/MapStateProvider';
+import EditPointForm from './components/EditPointForm/EditPointForm';
 
 interface AppProps {
 }
@@ -23,6 +24,7 @@ const App = () => {
           <div className="kts-app-container">
             <LineEditor></LineEditor>
             <NewLineForm></NewLineForm>
+            <EditPointForm></EditPointForm>
             <MapProvider>
                 <TileLayer
                   zIndex={0}

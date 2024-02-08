@@ -1,8 +1,6 @@
-import { Line } from "ktscore";
 import './LineEditor.css';
 
 import React, { useContext, useEffect, useState } from "react";
-import axios from "axios";
 import ViewContext from "../../contexts/view/ViewContext";
 import PopupIds from "../../contexts/view/PopupIds";
 import LineContext from "../../contexts/line/LineContext";
@@ -11,10 +9,9 @@ import MapStateContext from "../../contexts/mapState/MapStateContext";
 
 export default function LineEditor() {
   const { popup, setPopup } = useContext(ViewContext)!;
-  const { currentLine, setCurrentLine,
+  const { currentLine, setCurrentLine, currentPoint, setCurrentPoint,
           lines, refreshLines,
-          updatePoint, removePoint,
-          removeLine } = useContext(LineContext)!;
+          removePoint, removeLine } = useContext(LineContext)!;
   const { setCenter } = useContext(MapStateContext)!;
   const [collapsed, setCollapsed] = useState(true);
 
@@ -41,10 +38,11 @@ export default function LineEditor() {
   const selectPoint = (pos: number) => {
     const { lat, lng } = currentLineObj!.points[pos];
     setCenter?.(fromLonLat([lng, lat]))
+    setCurrentPoint(pos);
   }
 
   const modifyPoint = (pos: number) => {
-    //TODO
+    setPopup(PopupIds.EDIT_POINT);
   }
 
   const deletePoint = (pos: number) => {
@@ -84,7 +82,7 @@ export default function LineEditor() {
             <div className='kts-line-editor-title'>Points</div>
             {currentLineObj!.points.map((pt, index) => {
               return (
-                <div className={`kts-line-editor-line`} 
+                <div className={`kts-line-editor-line ${index === currentPoint ? 'kts-line-editor-current-line' : ''}`} 
                  key={pt.linepointid}
                  onClick={() => selectPoint(index)}>
                   <div className="kts-line-editor-circle" style={{background: currentLineObj!.color}}></div>

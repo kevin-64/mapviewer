@@ -1,11 +1,7 @@
 import React, { useRef, useState, useEffect, ReactElement, useContext } from "react"
 import MapContext from "./MapContext";
-import { Feature, Map, MapBrowserEvent, View } from "ol";
+import { Map, MapBrowserEvent, View } from "ol";
 import { toLonLat } from 'ol/proj'
-import { Coordinate } from "ol/coordinate";
-import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
-import { Point } from "ol/geom";
 import LineContext from "../line/LineContext";
 import { ZoomSlider, Zoom } from 'ol/control';
 import MapStateContext from "../mapState/MapStateContext";
@@ -16,7 +12,7 @@ interface MapProviderProps {
 
 const MapProvider = ({ children }: MapProviderProps) => {
   const mapRef = useRef(null);
-  const { currentLine, setCurrentLine, lines, addPoint } = useContext(LineContext)!;
+  const { currentLine, setCurrentLine, currentPoint, lines, addPoint } = useContext(LineContext)!;
   const { zoom, center } = useContext(MapStateContext)!; 
   const [map, setMap] = useState<Map | undefined>(undefined);
 
@@ -45,42 +41,36 @@ const MapProvider = ({ children }: MapProviderProps) => {
       if (!currentLine) return; //only add points to the selected line
 
       const currLine = lines.find(ln => ln.lineid === currentLine)!;
-      console.log(currLine);
-
       const lonLat = toLonLat(e.coordinate);
-      console.log(lonLat);
 
-      ;(map?.getAllLayers()
-      .filter(l => l.getClassName() === 'feature-layer')[0] as VectorLayer<VectorSource>)!
-      .getSource()!
-      .addFeature(new Feature(new Point(e.coordinate)));
-  
+      console.log("used to decide order: ", currentPoint)
+
       addPoint({
         name: 'additional-point',
         lat: lonLat[1],
         lng: lonLat[0],
         lineid: currLine.lineid,
-        direction: false as any, //TODO: allow deciding,
-        request: false, //TODO: allow deciding
-        order: currLine.points[currLine.points.length - 1].order + 1 //TODO: add anywhere);
+        direction: false as any,
+        request: false,
+        order: currentPoint !== undefined ? currentPoint : (currLine.points.length)
       });
       setCurrentLine(undefined);
     }
     map?.on('click', listener);
     return () => map?.un('click', listener);
-  }, [currentLine]);
+  }, [map, currentLine, currentPoint]);
 
   useEffect(() => {
     if (!map) return;
 
     map.getView().setZoom(zoom);
-  }, [zoom]);
+  }, [map, zoom]);
 
   useEffect(() => {
     if (!map) return;
     
     map.getView().setCenter(center)
-  }, [center]);
+  }, [map, center]);
   
   return (
     <MapContext.Provider value={map}>

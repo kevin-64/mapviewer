@@ -6,7 +6,7 @@ import { Line, LinePoint } from "ktscore";
 
 export default function LineProvider(props: PropsWithChildren) {
   const [selectedLine, setSelectedLine] = useState<number | undefined>(undefined);
-  const [poi, setPoi] = useState<number | undefined>(undefined);
+  const [selectedPoint, setSelectedPoint] = useState<number | undefined>(undefined);
   const [lines, setLines] = useState<LineWithPoints[]>([]);
 
   const loadLines = () => {
@@ -23,11 +23,7 @@ export default function LineProvider(props: PropsWithChildren) {
     return {
       lines,
       currentLine: selectedLine,
-      pointOfInsertion: poi,
-
-      setPointOfInsertion: (p: number) => {
-        setPoi(p);
-      },
+      currentPoint: selectedPoint,
 
       refreshLines: () => {
         loadLines();
@@ -56,30 +52,42 @@ export default function LineProvider(props: PropsWithChildren) {
 
       setCurrentLine: (id?: number) => {
         setSelectedLine(id);
-        setPoi(lines.find(ln => ln.lineid === id)?.points.length);
+      },
+      setCurrentPoint: (pos: number) => {
+        setSelectedPoint(pos);
       },
       addPoint: (pt: LinePointRecord) => {
+        const lineId = pt.lineid;
         axios.post('http://localhost:8080/points', {
           ...pt,
         }).then(resp => {
-          lines.find(ln => ln.lineid === pt.lineid)?.points.splice(pt.order, 0, { ...pt, linepointid: resp.data });
-          setSelectedLine(pt.lineid);
+          console.log(resp);
+
+          lines.find(ln => ln.lineid === lineId)?.points.splice(pt.order, 0, { ...pt, linepointid: resp.data });
+          setSelectedLine(lineId);
+        });
+      },
+      updatePoint: (pt: LinePoint) => {
+        axios.patch(`http://localhost:8080/linepoints/${pt.linepointid}`, {
+          ...pt
+        }).then(resp => {
           console.log(resp);
         });
       },
-      updatePoint: (pt: LinePoint) => {},
       removePoint: (pos: number) => {
         const selLine = lines.find(ln => ln.lineid === selectedLine)!
         const lineId = selLine.lineid;
         const linepointid = selLine.points[pos].linepointid;
         axios.delete(`http://localhost:8080/linepoints/${linepointid}`).then(resp => {
+          console.log(resp);
+
           lines.find(ln => ln.lineid === lineId)?.points.splice(pos, 1);
           setSelectedLine(lineId);
-          console.log(resp);
+          setSelectedPoint(undefined);
         })
       },
     }
-  }, [selectedLine, lines]);
+  }, [selectedLine, selectedPoint, lines]);
 
   return (
     <LineContext.Provider value={provider}>

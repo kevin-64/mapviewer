@@ -36,7 +36,6 @@ export default function NewLineForm() {
   }
 
   const editLine = () => {
-    console.log(name);
     updateLine({
       lineid: currentLine!,
       name,

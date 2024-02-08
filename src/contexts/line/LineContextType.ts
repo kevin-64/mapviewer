@@ -8,9 +8,7 @@ export type LineWithPoints = Line & { points: (PointRecord & Omit<LinePoint, 'po
 export default interface LineContextType {
   lines: LineWithPoints[]
   currentLine?: number;
-  pointOfInsertion?: number;
-
-  setPointOfInsertion: (poi: number) => void
+  currentPoint?: number;
 
   refreshLines: () => void
   
@@ -19,6 +17,7 @@ export default interface LineContextType {
   removeLine: (id: number) => void
 
   setCurrentLine: (id?: number) => void
+  setCurrentPoint: (pt: number) => void
 
   addPoint: (pt: LinePointRecord) => void
   updatePoint: (pt: LinePoint) => void
