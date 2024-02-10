@@ -20,7 +20,6 @@
     "start": "webpack serve --hot --open --no-client-overlay"
   },
   "dependencies": {
-    "@arcgis/core": "^4.27.6",
     "axios": "^1.6.1",
     "ol": "^8.1.0",
     "react": "^18.2.0",
