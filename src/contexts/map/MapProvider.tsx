@@ -51,6 +51,7 @@ const MapProvider = ({ children }: MapProviderProps) => {
         lng: lonLat[0],
         lineid: currLine.lineid,
         direction: false as any,
+        stop: false,
         request: false,
         order: currentPoint !== undefined ? currentPoint : (currLine.points.length)
       });

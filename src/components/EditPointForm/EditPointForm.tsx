@@ -11,6 +11,7 @@ export default function EditPointForm() {
   const { lines, currentLine, currentPoint, updatePoint } = useContext(LineContext)!;
   const { popup, setViewMode, setPopup } = useContext(ViewContext)!;
   const [name, setName] = useState('');
+  const [stop, setStop] = useState(false);
   const [request, setRequest] = useState(false);
   const [direction, setDirection] = useState(false);
 
@@ -21,10 +22,12 @@ export default function EditPointForm() {
     if (currLineObj && isEditPoint) {
       const currPtObj = currLineObj.points[currentPoint!];
       setName(currPtObj.name);
+      setStop(currPtObj.stop);
       setRequest(currPtObj.request);
       setDirection(currPtObj.direction as any);
     } else {
       setName('');
+      setStop(false);
       setRequest(false);
       setDirection(false);
     }
@@ -35,7 +38,8 @@ export default function EditPointForm() {
     updatePoint({
       ...currentPtObj,
       name,
-      request,
+      stop,
+      request: stop && request,
       direction: direction as any
     });
     close();
@@ -51,8 +55,12 @@ export default function EditPointForm() {
       <div className={`kts-edit-point-form`}>
         <button onClick={() => close()}>Close</button><br />
         Name: <input type="text" value={name} onChange={(e) => setName(e.target.value)} /><br />
-        Request: <input type="checkbox" 
-                            checked={request} 
+        Stop: <input type="checkbox" 
+                            checked={stop} 
+                            onChange={(e) => setStop(e.target.checked)}></input><br />
+        Request: <input type="checkbox"
+                            disabled={!stop} 
+                            checked={stop && request} 
                             onChange={(e) => setRequest(e.target.checked)}></input><br />
         Direction: <input type="checkbox" 
                             checked={direction} 
