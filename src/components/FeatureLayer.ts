@@ -41,19 +41,25 @@ const FeatureLayer = ({ zIndex = 0 }) => {
 
     source.clear();
 
+    const featuresToAdd: Feature[] = [];
     lines.forEach(ln => {
       ln.points.forEach((pt, index) => {
-        source!.addFeature(new Feature(ptToOLPoint(pt)));
+
+        if (ln.lineid === currentLine) {
+          featuresToAdd.push(new Feature(ptToOLPoint(pt)));
+        }
+        
         if (index > 0) {
           const lineFeature = new Feature(new OLLineString([
             ptToCoord(ln.points[index - 1]), 
             ptToCoord(pt)
           ]));
           lineFeature.setProperties({ fName: ln.lineid })
-          source.addFeature(lineFeature);
+          featuresToAdd.push(lineFeature);
         }
       });
     });
+    source!.addFeatures(featuresToAdd);
   }, [lines.length, currentLine]);
 
   useEffect(() => {

@@ -62,20 +62,22 @@ export default function LineEditor() {
       </> :
       <>
         <button onClick={() => setCollapsed(true)}>Hide</button>
-        <div className="kts-line-editor-title">Lines</div>
-        {lines.map(ln => {
-          return (
-            <div className={`kts-line-editor-line ${ln.lineid === currentLine ? 'kts-line-editor-current-line' : ''}`} 
-                 key={ln.lineid}
-                 onClick={() => selectLine(ln.lineid)}>
-              <div className="kts-line-editor-circle" style={{background: ln.color}}></div>
-              {ln.name}
-              <button onClick={() => deleteLine(ln.lineid)}>X</button>
-              <button onClick={() => modifyLine(ln.lineid)}>Edit</button>
-            </div>
-          )
-        })}
-        <button onClick={() => newLine()}>+ Add</button>
+        <div className="kts-line-editor-lines">
+          <div className="kts-line-editor-title">Lines</div>
+          {lines.map(ln => {
+            return (
+              <div className={`kts-line-editor-line ${ln.lineid === currentLine ? 'kts-line-editor-current-line' : ''}`} 
+                  key={ln.lineid}
+                  onClick={() => selectLine(ln.lineid)}>
+                <div className="kts-line-editor-circle" style={{background: ln.color}}></div>
+                {ln.name}
+                <button onClick={() => deleteLine(ln.lineid)}>X</button>
+                <button onClick={() => modifyLine(ln.lineid)}>Edit</button>
+              </div>
+            )
+          })}
+          <button onClick={() => newLine()}>+ Add</button>
+        </div>
         {
           currentLine ?
           <div className="kts-line-editor-points">

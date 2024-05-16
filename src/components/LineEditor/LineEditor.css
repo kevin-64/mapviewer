@@ -15,6 +15,12 @@
   margin-left: 5px;
 }
 
+.kts-line-editor-lines {
+  max-height: 50%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
 .kts-line-editor-line {
   font-size: 14px;
   margin-left: 10px;
@@ -57,4 +63,6 @@
 .kts-line-editor-points {
   min-height: 200px;
   margin-top: 20px;
+  max-height: 50%;
+  overflow-y: scroll;
 }
