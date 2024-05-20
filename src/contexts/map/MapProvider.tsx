@@ -45,7 +45,7 @@ const MapProvider = ({ children }: MapProviderProps) => {
 
       if (editingPaths) {
         //shape editor - add next point in the correct position
-        console.log("used to decide order: ", currentPoint)
+        // console.log("used to decide order: ", currentPoint)
 
         addPoint({
           name: 'path-point',

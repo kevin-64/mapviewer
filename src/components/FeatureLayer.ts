@@ -8,9 +8,10 @@ import Stroke from "ol/style/Stroke";
 import Vector from "ol/source/Vector";
 import { Feature } from "ol";
 import { fromLonLat } from "ol/proj";
-import { Point as OLPoint, LineString as OLLineString } from "ol/geom";
+import { Point as OLPoint, LineString } from "ol/geom";
 import LineContext from "../contexts/line/LineContext";
 import { PointRecord } from "../contexts/line/LineContextType";
+import { Coordinate } from "ol/coordinate";
 
 const ptToCoord = (pt: PointRecord) => {
   return fromLonLat([pt.lng, pt.lat]);
@@ -32,7 +33,7 @@ const FeatureLayer = ({ zIndex = 0 }) => {
   const map = useContext(MapContext); 
 
   useEffect(() => {
-    const src = new Vector();
+    const src = new Vector({});
     setSource(src);
   }, []);
 
@@ -53,17 +54,16 @@ const FeatureLayer = ({ zIndex = 0 }) => {
       });
 
       ln.paths.forEach((path, pathIndex) => {
+        const pathGeometry: Coordinate[] = [];
+
         path.points.forEach((pt, pointIndex) => {
-          if (pointIndex > 0) {
-            const lineFeature = new Feature(new OLLineString([
-              ptToCoord(path.points[pointIndex - 1]), 
-              ptToCoord(pt)
-            ]));
-            lineFeature.setProperties({ fName: ln.lineid })
-            featuresToAdd.push(lineFeature);
-          }
+          pathGeometry.push(ptToCoord(pt));
         });
-      })
+
+        const pathFeature = new Feature(new LineString(pathGeometry));
+        pathFeature.setProperties({ fName: ln.lineid });
+        featuresToAdd.push(pathFeature);
+      });
     });
     source!.addFeatures(featuresToAdd);
   }, [lines.length, currentLine]);
@@ -71,6 +71,7 @@ const FeatureLayer = ({ zIndex = 0 }) => {
   useEffect(() => {
     if (!map) return;
 
+    const baseOpacity = currentLine != null ? 96 : 255;
     const featureLayer = new VectorLayer({
       className: 'feature-layer',
       source,
@@ -104,10 +105,10 @@ const FeatureLayer = ({ zIndex = 0 }) => {
           const line = lines.find(ln => ln.lineid === fProps.fName);
           return new Style({
             stroke: new Stroke({
-              color:  withOpacity(line?.color || '', line?.lineid === currentLine ? 255 : 128),
+              color:  withOpacity(line?.color || '', line?.lineid === currentLine ? 255 : baseOpacity),
               width: 5,
             })
-          })
+          });
         }
       }
     });

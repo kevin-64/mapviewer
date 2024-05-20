@@ -27,7 +27,7 @@ export default function LineEditor() {
     setPopup(PopupIds.ADD_LINE);
   }
 
-  const selectLine = (id: number) => {
+  const selectLine = (id?: number) => {
     setCurrentLine(id);
     setCurrentPath(undefined);
   }
@@ -44,6 +44,12 @@ export default function LineEditor() {
 
   const selectStop = (pos: number) => {
     const { lat, lng } = currentLineObj!.points[pos];
+    setCenter?.(fromLonLat([lng, lat]))
+    setCurrentPoint(pos);
+  }
+
+  const selectPoint = (pos: number) => {
+    const { lat, lng } = currentPathObj!.points.find(pt => pt.order === pos)!;
     setCenter?.(fromLonLat([lng, lat]))
     setCurrentPoint(pos);
   }
@@ -85,6 +91,7 @@ export default function LineEditor() {
         <button onClick={() => setCollapsed(true)}>Hide</button>
         <div className="kts-line-editor-lines">
           <div className="kts-line-editor-title">Lines</div>
+          <button key="btn-clear-sel" onClick={() => selectLine(undefined)}>Clear selection</button>
           {lines.map(ln => {
             return (
               <div className={`kts-line-editor-line ${ln.lineid === currentLine ? 'kts-line-editor-current-line' : ''}`} 
@@ -109,18 +116,20 @@ export default function LineEditor() {
                 currentPath != null ? 
                   (
                     <>
-                      <button onClick={() => setCurrentPath(undefined)}>&lt;&lt;</button>
+                      <button key="btn-back" onClick={() => setCurrentPath(undefined)}>&lt;&lt;</button>
                       Path {currentPathObj!.pathid}
-                      {currentPathObj!.points.map(point => {
-                        return (
-                          <div className={`kts-line-editor-point ${point.order === currentPoint ? 'kts-line-editor-current-point' : ''}`} 
-                              key={point.order}
-                              onClick={() => setCurrentPoint(point.order)}>
-                            Path Point
-                            <button onClick={() => deletePoint(point.order)}>X</button>
-                          </div>
-                        )
-                      })}
+                      <div key="path-points" className='kts-line-editor-points'>
+                        {currentPathObj!.points.map(point => {
+                          return (
+                            <div className={`kts-line-editor-point ${point.order === currentPoint ? 'kts-line-editor-current-point' : ''}`} 
+                                key={point.order}
+                                onClick={() => selectPoint(point.order)}>
+                              Path Point
+                              <button onClick={() => deletePoint(point.order)}>X</button>
+                            </div>
+                          )
+                        })}
+                      </div>
                     </>
                   ) :
                   (

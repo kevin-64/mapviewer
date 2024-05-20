@@ -81,6 +81,11 @@
   background-color: #f46e2a;
 }
 
+.kts-line-editor-bottom {
+  overflow-y: scroll;
+  max-height: 48%;
+}
+
 .kts-line-editor-path {
   font-size: 14px;
   margin-left: 10px;
