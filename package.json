@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "main": "src/index.tsx",
   "author": "Kevin Pellegrini",
-  "license": "MIT",
   "devDependencies": {
     "@types/react": "^18.2.24",
     "@types/react-dom": "^18.2.8",
