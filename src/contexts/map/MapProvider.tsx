@@ -12,7 +12,7 @@ interface MapProviderProps {
 
 const MapProvider = ({ children }: MapProviderProps) => {
   const mapRef = useRef(null);
-  const { currentLine, setCurrentLine, currentPoint, lines, addPoint } = useContext(LineContext)!;
+  const { currentLine, setCurrentLine, currentPoint, currentPath, editingPaths, lines, addPoint, addStop } = useContext(LineContext)!;
   const { zoom, center } = useContext(MapStateContext)!; 
   const [map, setMap] = useState<Map | undefined>(undefined);
 
@@ -43,23 +43,34 @@ const MapProvider = ({ children }: MapProviderProps) => {
       const currLine = lines.find(ln => ln.lineid === currentLine)!;
       const lonLat = toLonLat(e.coordinate);
 
-      console.log("used to decide order: ", currentPoint)
+      if (editingPaths) {
+        //shape editor - add next point in the correct position
+        console.log("used to decide order: ", currentPoint)
 
-      addPoint({
-        name: 'additional-point',
-        lat: lonLat[1],
-        lng: lonLat[0],
-        lineid: currLine.lineid,
-        direction: false as any,
-        stop: false,
-        request: false,
-        order: currentPoint !== undefined ? currentPoint : (currLine.points.length)
-      });
-      setCurrentLine(undefined);
+        addPoint({
+          name: 'path-point',
+          lat: lonLat[1],
+          lng: lonLat[0],
+          pathid: currentPath!,
+          order: currentPoint || 0
+        });
+        setCurrentLine(undefined);
+      } else {
+        //stop editor - add stop to the list, order is not important
+        addStop({
+          name: 'additional-stop',
+          lat: lonLat[1],
+          lng: lonLat[0],
+          lineid: currLine.lineid,
+          request: false,
+        });
+        setCurrentLine(undefined);
+      }
     }
+
     map?.on('click', listener);
     return () => map?.un('click', listener);
-  }, [map, currentLine, currentPoint]);
+  }, [map, editingPaths, currentLine, currentPath, currentPoint]);
 
   useEffect(() => {
     if (!map) return;

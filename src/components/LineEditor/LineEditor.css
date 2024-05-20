@@ -51,6 +51,62 @@
   background-color: #f46e2a;
 }
 
+.kts-line-editor-point {
+  font-size: 14px;
+  margin-left: 10px;
+  padding-left: 5px;
+  margin-bottom: 3px;
+  border-radius: 4px;
+  margin-right: 10px;
+  border: 1px solid black;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.kts-line-editor-point:hover {
+  background-color: #dddddd;
+}
+
+.kts-line-editor-point>button {
+  margin-left: 5px;
+}
+
+.kts-line-editor-current-point {
+  background-color: orange;
+}
+
+.kts-line-editor-current-point:hover {
+  background-color: #f46e2a;
+}
+
+.kts-line-editor-path {
+  font-size: 14px;
+  margin-left: 10px;
+  padding-left: 5px;
+  margin-bottom: 3px;
+  border-radius: 4px;
+  margin-right: 10px;
+  border: 1px solid black;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.kts-line-editor-path:hover {
+  background-color: #dddddd;
+}
+
+.kts-line-editor-current-path {
+  background-color: orange;
+}
+
+.kts-line-editor-current-path:hover {
+  background-color: #f46e2a;
+}
+
 .kts-line-editor-circle {
   width: 6px;
   height: 6px;
@@ -65,4 +121,13 @@
   margin-top: 20px;
   max-height: 50%;
   overflow-y: scroll;
+}
+
+.kts-hidden {
+  display: none !important;
+}
+
+.kts-selected {
+  background-color: black;
+  color: white;
 }

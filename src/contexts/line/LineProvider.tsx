@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
-import LineContextType, { LinePointRecord, LineRecord, LineWithPoints } from "./LineContextType";
+import LineContextType, { LinePointRecord, LineRecord, LineWithPoints, PathPointRecord, PointRecord } from "./LineContextType";
 import LineContext from './LineContext';
 import axios from "axios";
 import { Line, LinePoint } from "ktscore";
@@ -7,10 +7,12 @@ import { Line, LinePoint } from "ktscore";
 export default function LineProvider(props: PropsWithChildren) {
   const [selectedLine, setSelectedLine] = useState<number | undefined>(undefined);
   const [selectedPoint, setSelectedPoint] = useState<number | undefined>(undefined);
+  const [selectedPath, setSelectedPath] = useState<number | undefined>(undefined);
+  const [editPaths, setEditPaths] = useState(false);
   const [lines, setLines] = useState<LineWithPoints[]>([]);
 
-  const loadLines = () => {
-    axios.get('http://localhost:8080/lines').then((res) => {
+  const loadLines = async () => {
+    return axios.get('http://localhost:8080/lines').then((res) => {
       setLines(res.data as LineWithPoints[]);
      });
   }
@@ -24,9 +26,18 @@ export default function LineProvider(props: PropsWithChildren) {
       lines,
       currentLine: selectedLine,
       currentPoint: selectedPoint,
+      currentPath: selectedPath,
+      editingPaths: editPaths,
 
       refreshLines: () => {
-        loadLines();
+        let newSelPointId: number | undefined = undefined;
+        if (selectedPoint != null) {
+          newSelPointId = lines.find(ln => ln.lineid === selectedLine)!.points[selectedPoint].linepointid;
+        }
+        loadLines().then(() => {
+          const index = lines.find(ln => ln.lineid === selectedLine)?.points.findIndex(pt => pt.linepointid === newSelPointId);
+          setSelectedPoint(index !== -1 ? index : undefined);
+        });
       },
 
       addLine: (ln: LineRecord) => {
@@ -50,21 +61,34 @@ export default function LineProvider(props: PropsWithChildren) {
         });
       },
 
+      setEditingPaths: (b: boolean) => {
+        setEditPaths(b);
+      },
       setCurrentLine: (id?: number) => {
         setSelectedLine(id);
       },
       setCurrentPoint: (pos: number) => {
         setSelectedPoint(pos);
       },
-      addPoint: (pt: LinePointRecord) => {
-        const lineId = pt.lineid;
-        axios.post('http://localhost:8080/points', {
+      setCurrentPath: (p?: number) => {
+        setSelectedPath(p);
+      },
+      addPoint: (pt: PathPointRecord & PointRecord) => {
+        const selLine = selectedLine;
+        axios.post(`http://localhost:8080/lines/${selectedLine}/paths/${selectedPath}/points`, {
           ...pt,
         }).then(resp => {
           console.log(resp);
 
-          lines.find(ln => ln.lineid === lineId)?.points.splice(pt.order, 0, { ...pt, linepointid: resp.data });
-          setSelectedLine(lineId);
+          const paths = lines.find(ln => ln.lineid === selectedLine)?.paths;
+          const newPt = { ...pt, pointid: resp.data as number};
+
+          const selectedPathPoints = paths?.find(p => p.pathid === selectedPath)?.points!;
+          selectedPathPoints.forEach((point, index) => {
+            if (point.order >= newPt.order) selectedPathPoints[index].order++
+          });
+          selectedPathPoints.splice(pt.order, 0, newPt);
+          setSelectedLine(selLine);
         });
       },
       updatePoint: (pt: LinePoint) => {
@@ -75,19 +99,82 @@ export default function LineProvider(props: PropsWithChildren) {
         });
       },
       removePoint: (pos: number) => {
-        const selLine = lines.find(ln => ln.lineid === selectedLine)!
-        const lineId = selLine.lineid;
-        const linepointid = selLine.points[pos].linepointid;
-        axios.delete(`http://localhost:8080/linepoints/${linepointid}`).then(resp => {
+        const selLine = selectedLine;
+        const points = lines.find(ln => ln.lineid === selLine)?.paths.find(path => path.pathid === selectedPath)?.points;
+        const indexToRemove = points!.findIndex(point => point.order === pos);
+        axios.delete(`http://localhost:8080/lines/${selLine}/paths/${selectedPath}/points/${pos}`).then(resp => {
           console.log(resp);
 
-          lines.find(ln => ln.lineid === lineId)?.points.splice(pos, 1);
-          setSelectedLine(lineId);
+          points!.splice(indexToRemove, 1);
+
+          setSelectedLine(selLine);
           setSelectedPoint(undefined);
         })
       },
+
+      addStop: (stop: LinePointRecord) => {
+        const lineId = stop.lineid;
+        axios.post(`http://localhost:8080/lines/${lineId}/points`, {
+          ...stop,
+        }).then(resp => {
+          console.log(resp);
+
+          lines.find(ln => ln.lineid === lineId)?.points.push({ ...stop, linepointid: resp.data });
+          setSelectedLine(lineId);
+        });
+      },
+      updateStop: (stop: LinePoint) => {
+        axios.patch(`http://localhost:8080/lines/${stop.lineid}/points/${stop.linepointid}`, {
+          ...stop
+        }).then(resp => {
+          console.log(resp);
+        });
+      },
+      removeStop: (id: number) => {
+        const selLine = lines.find(ln => ln.lineid === selectedLine)!
+        const lineId = selLine.lineid;
+        axios.delete(`http://localhost:8080/lines/${lineId}/points/${id}`).then(resp => {
+          console.log(resp);
+
+          const points = lines.find(ln => ln.lineid === lineId)?.points;
+          if (points) {
+            const stopIndex = points.findIndex(pt => pt.linepointid === id);
+            points.splice(stopIndex, 1);
+          }
+
+          setSelectedLine(lineId);
+          setSelectedPoint(undefined);
+          setSelectedPath(undefined);
+        })
+      },
+
+      addPath: () => {
+        const selLine = selectedLine;
+        const lineId = lines.find(ln => ln.lineid === selLine)!.lineid;
+        setSelectedLine(undefined);
+        axios.post(`http://localhost:8080/lines/${lineId}/paths`, {
+          lineid: lineId
+        }).then(resp => {
+          console.log(resp);
+          lines.find(ln => ln.lineid === selectedLine)!.paths.push({
+            lineid: lineId,
+            pathid: resp.data as number,
+            points: []
+          });
+          setSelectedLine(selLine);
+        });
+      },
+      removePath: (pathid: number) => {
+        axios.delete(`http://localhost:8080/lines/${selectedLine}/paths/${pathid}`).then(resp => {
+          console.log(resp);
+          const paths = lines.find(ln => ln.lineid === selectedLine)!.paths;
+          const pathIndex = paths.findIndex(p => p.pathid === pathid);
+          paths.splice(pathIndex, 1);
+          setSelectedPath(undefined);
+        });
+      }
     }
-  }, [selectedLine, selectedPoint, lines]);
+  }, [selectedLine, selectedPoint, selectedPath, lines, editPaths]);
 
   return (
     <LineContext.Provider value={provider}>

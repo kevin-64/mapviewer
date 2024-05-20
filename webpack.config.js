@@ -8,6 +8,9 @@ module.exports = () => {
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
     },
+    devServer: {
+      port: 9001
+    },
     context: resolve(__dirname, './'),
     module: {
       rules: [

@@ -46,18 +46,24 @@ const FeatureLayer = ({ zIndex = 0 }) => {
       ln.points.forEach((pt, index) => {
 
         if (ln.lineid === currentLine) {
-          featuresToAdd.push(new Feature(ptToOLPoint(pt)));
-        }
-        
-        if (index > 0) {
-          const lineFeature = new Feature(new OLLineString([
-            ptToCoord(ln.points[index - 1]), 
-            ptToCoord(pt)
-          ]));
-          lineFeature.setProperties({ fName: ln.lineid })
-          featuresToAdd.push(lineFeature);
+          const ptFeature = new Feature(ptToOLPoint(pt));
+          ptFeature.setProperties({pLine: ln.lineid});
+          featuresToAdd.push(ptFeature);
         }
       });
+
+      ln.paths.forEach((path, pathIndex) => {
+        path.points.forEach((pt, pointIndex) => {
+          if (pointIndex > 0) {
+            const lineFeature = new Feature(new OLLineString([
+              ptToCoord(path.points[pointIndex - 1]), 
+              ptToCoord(pt)
+            ]));
+            lineFeature.setProperties({ fName: ln.lineid })
+            featuresToAdd.push(lineFeature);
+          }
+        });
+      })
     });
     source!.addFeatures(featuresToAdd);
   }, [lines.length, currentLine]);
@@ -70,18 +76,30 @@ const FeatureLayer = ({ zIndex = 0 }) => {
       source,
       style: function(feature) {
         const fProps = feature.getProperties();
-        if (!fProps.fName) {
-          return new Style({
-            image: new Circle({
-              fill: new Fill({
-                color: 'red'
-              }),
-              stroke: new Stroke({
-                color: 'white',
-              }),
-              radius: 5,
-            })
-          });
+        if (fProps.pLine) {
+          const line = lines.find(ln => ln.lineid === fProps.pLine);
+
+          return [
+            new Style({
+              image: new Circle({
+                fill: new Fill({
+                  color: line?.color || ''
+                }),
+                stroke: new Stroke({
+                  color: 'white',
+                }),
+                radius: 5,
+              })
+            }),
+            new Style({
+              image: new Circle({
+                stroke: new Stroke({
+                  color: 'black',
+                }),
+                radius: 6,
+              })
+            }),
+          ];
         } else {
           const line = lines.find(ln => ln.lineid === fProps.fName);
           return new Style({

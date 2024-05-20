@@ -9,13 +9,19 @@ import MapStateContext from "../../contexts/mapState/MapStateContext";
 
 export default function LineEditor() {
   const { popup, setPopup } = useContext(ViewContext)!;
-  const { currentLine, setCurrentLine, currentPoint, setCurrentPoint,
+  const { currentLine, setCurrentLine, 
+          currentPoint, setCurrentPoint,
+          currentPath, setCurrentPath,
+          removePoint,
           lines, refreshLines,
-          removePoint, removeLine } = useContext(LineContext)!;
+          addPath, removePath, editingPaths, setEditingPaths,
+          removeStop, removeLine } = useContext(LineContext)!;
   const { setCenter } = useContext(MapStateContext)!;
   const [collapsed, setCollapsed] = useState(true);
 
+  // console.log(lines);
   const currentLineObj = lines.find(ln => ln.lineid === currentLine);
+  const currentPathObj = currentLineObj?.paths.find(p => p.pathid === currentPath);
 
   const newLine = () => {
     setPopup(PopupIds.ADD_LINE);
@@ -23,6 +29,7 @@ export default function LineEditor() {
 
   const selectLine = (id: number) => {
     setCurrentLine(id);
+    setCurrentPath(undefined);
   }
 
   const deleteLine = (id: number) => {
@@ -35,19 +42,33 @@ export default function LineEditor() {
     refreshLines();
   }
 
-  const selectPoint = (pos: number) => {
+  const selectStop = (pos: number) => {
     const { lat, lng } = currentLineObj!.points[pos];
     setCenter?.(fromLonLat([lng, lat]))
     setCurrentPoint(pos);
   }
 
-  const modifyPoint = (pos: number) => {
-    setPopup(PopupIds.EDIT_POINT);
+  const modifyStop = (pos: number) => {
+    setPopup(PopupIds.EDIT_STOP);
+  }
+
+  const deleteStop = (pos: number) => {
+    removeStop(currentLineObj!.points[pos].linepointid);
+    setCurrentLine(undefined);
   }
 
   const deletePoint = (pos: number) => {
     removePoint(pos);
     setCurrentLine(undefined);
+  }
+
+  const newPath = () => {
+    addPath();
+  }
+
+  const deletePath = (id: number) => {
+    removePath(id);
+    setCurrentPath(undefined);
   }
 
   useEffect(() => {
@@ -80,23 +101,62 @@ export default function LineEditor() {
         </div>
         {
           currentLine ?
-          <div className="kts-line-editor-points">
-            <div className='kts-line-editor-title'>Points</div>
+          <div className="kts-line-editor-bottom">
+            <button className={`kts-line-editor-tab ${editingPaths ? 'kts-selected' : ''}`} onClick={() => setEditingPaths(true)}>Paths</button>
+            <button className={`kts-line-editor-tab ${editingPaths ? '' : 'kts-selected'}`} onClick={() => setEditingPaths(false)}>Stops</button>
+            <div className={`kts-line-editor-paths ${editingPaths ? '' : 'kts-hidden'}`}>
+              {
+                currentPath != null ? 
+                  (
+                    <>
+                      <button onClick={() => setCurrentPath(undefined)}>&lt;&lt;</button>
+                      Path {currentPathObj!.pathid}
+                      {currentPathObj!.points.map(point => {
+                        return (
+                          <div className={`kts-line-editor-point ${point.order === currentPoint ? 'kts-line-editor-current-point' : ''}`} 
+                              key={point.order}
+                              onClick={() => setCurrentPoint(point.order)}>
+                            Path Point
+                            <button onClick={() => deletePoint(point.order)}>X</button>
+                          </div>
+                        )
+                      })}
+                    </>
+                  ) :
+                  (
+                    <>
+                      <button key="btn-addpath" onClick={() => newPath()}>+</button>
+                      {currentLineObj!.paths.map(path => {
+                        return (
+                          <div className={`kts-line-editor-path ${path.pathid === currentPath ? 'kts-line-editor-current-path' : ''}`} 
+                              key={path.pathid}
+                              onClick={() => setCurrentPath(path.pathid)}>
+                            Path {path.pathid}
+                            <button onClick={() => deletePath(path.pathid)}>X</button>
+                          </div>
+                        )
+                      })}
+                    </>
+                  )
+              }
+            </div>
+            <div className={`kts-line-editor-stops ${editingPaths ? 'kts-hidden' : ''}`}>
             {currentLineObj!.points.map((pt, index) => {
-              return (
-                <div className={`kts-line-editor-line ${index === currentPoint ? 'kts-line-editor-current-line' : ''}`} 
-                 key={pt.linepointid}
-                 onClick={() => selectPoint(index)}>
-                  <div className="kts-line-editor-circle" style={{background: currentLineObj!.color}}></div>
-                  {pt.name}
-                  <button onClick={(e) => {
-                    deletePoint(index);
-                    e.stopPropagation();
-                  }}>X</button>
-                  <button onClick={() => modifyPoint(index)}>Edit</button>
-                </div>
-              )
-            })}
+                return (
+                  <div className={`kts-line-editor-line ${index === currentPoint ? 'kts-line-editor-current-line' : ''}`} 
+                  key={pt.linepointid}
+                  onClick={() => selectStop(index)}>
+                    <div className="kts-line-editor-circle" style={{background: currentLineObj!.color}}></div>
+                    {pt.name}
+                    <button onClick={(e) => {
+                      deleteStop(index);
+                      e.stopPropagation();
+                    }}>X</button>
+                    <button onClick={() => modifyStop(index)}>Edit</button>
+                  </div>
+                )
+              })}
+            </div>
           </div>
           : <></>
         }

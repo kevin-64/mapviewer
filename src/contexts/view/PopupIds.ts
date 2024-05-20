@@ -1,7 +1,7 @@
 enum PopupIds {
   ADD_LINE = 'ADD_LINE',
   EDIT_LINE = 'EDIT_LINE',
-  EDIT_POINT = 'EDIT_POINT'
+  EDIT_STOP = 'EDIT_STOP'
 }
 
 export default PopupIds;

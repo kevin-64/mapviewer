@@ -152,7 +152,7 @@ const TileLayer = ({ zIndex = 0 }) => {
           })
         } else {
           if (counter < 100000) {
-            //TODO: handle other features
+            //TODOK: handle other features
             // console.log(feature.getProperties());
             setCounter(counter + 1);
           }
