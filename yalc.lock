@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "packages": {
+    "ktsuilib": {
+      "signature": "875101cf049b08d1c63d2f65a3e4de38",
+      "file": true
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import React from 'react'
 import { fromLonLat } from 'ol/proj';
-import MapProvider from './contexts/map/MapProvider';
+import { MapProvider } from 'ktsuilib';
 import TileLayer from './components/TileLayer';
 import FeatureLayer from './components/FeatureLayer';
 import LineEditor from './components/LineEditor/LineEditor';
@@ -9,7 +9,7 @@ import './App.css';
 import NewLineForm from './components/NewLineForm/NewLineForm';
 import LineProvider from './contexts/line/LineProvider';
 import ViewProvider from './contexts/view/ViewProvider';
-import MapStateProvider from './contexts/mapState/MapStateProvider';
+import { MapStateProvider } from 'ktsuilib';
 import EditPointForm from './components/EditPointForm/EditPointForm';
 
 interface AppProps {

@@ -1,14 +1,14 @@
 import { useContext, useEffect, useState } from "react";
-import MapContext from "../contexts/map/MapContext";
+import { MapContext } from 'ktsuilib';
 import VectorLayer from "ol/layer/Vector";
 import Style from "ol/style/Style";
 import Fill from "ol/style/Fill";
 import Circle from "ol/style/Circle"
 import Stroke from "ol/style/Stroke";
-import Vector from "ol/source/Vector";
+import VectorSource from "ol/source/Vector";
 import { Feature } from "ol";
 import { fromLonLat } from "ol/proj";
-import { Point as OLPoint, LineString } from "ol/geom";
+import { Point as OLPoint, LineString, Geometry } from "ol/geom";
 import LineContext from "../contexts/line/LineContext";
 import { PointRecord } from "../contexts/line/LineContextType";
 import { Coordinate } from "ol/coordinate";
@@ -28,12 +28,12 @@ const withOpacity = (color: string, opacity: number) => {
 }
 
 const FeatureLayer = ({ zIndex = 0 }) => {
-  const [source, setSource] = useState<Vector | undefined>(undefined);
+  const [source, setSource] = useState<VectorSource | undefined>(undefined);
   const { lines, currentLine } = useContext(LineContext)!;
   const map = useContext(MapContext); 
 
   useEffect(() => {
-    const src = new Vector({});
+    const src = new VectorSource({});
     setSource(src);
   }, []);
 
@@ -74,7 +74,7 @@ const FeatureLayer = ({ zIndex = 0 }) => {
     const baseOpacity = currentLine != null ? 96 : 255;
     const featureLayer = new VectorLayer({
       className: 'feature-layer',
-      source,
+      source: source as any,
       style: function(feature) {
         const fProps = feature.getProperties();
         if (fProps.pLine) {
@@ -112,6 +112,7 @@ const FeatureLayer = ({ zIndex = 0 }) => {
         }
       }
     });
+    featureLayer.getSource()?.addFeature(new Feature())
     map.addLayer(featureLayer);
     featureLayer.setZIndex(1);
     return () => {

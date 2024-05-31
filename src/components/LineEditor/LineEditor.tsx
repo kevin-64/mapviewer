@@ -4,19 +4,22 @@ import React, { useContext, useEffect, useState } from "react";
 import ViewContext from "../../contexts/view/ViewContext";
 import PopupIds from "../../contexts/view/PopupIds";
 import LineContext from "../../contexts/line/LineContext";
-import { fromLonLat } from "ol/proj";
-import MapStateContext from "../../contexts/mapState/MapStateContext";
+import { fromLonLat, toLonLat } from "ol/proj";
+import { MapStateContext } from 'ktsuilib';
+import { MapBrowserEvent } from 'ol';
+import useEventEffect from '../../hooks/useEventEffect';
 
 export default function LineEditor() {
   const { popup, setPopup } = useContext(ViewContext)!;
   const { currentLine, setCurrentLine, 
           currentPoint, setCurrentPoint,
           currentPath, setCurrentPath,
-          removePoint,
+          addPoint, removePoint,
           lines, refreshLines,
           addPath, removePath, editingPaths, setEditingPaths,
-          removeStop, removeLine } = useContext(LineContext)!;
-  const { setCenter } = useContext(MapStateContext)!;
+          addStop, removeStop, 
+          removeLine } = useContext(LineContext)!;
+  const { setCenter, addClickAction, removeClickAction } = useContext(MapStateContext)!;
   const [collapsed, setCollapsed] = useState(true);
 
   // console.log(lines);
@@ -76,6 +79,41 @@ export default function LineEditor() {
     removePath(id);
     setCurrentPath(undefined);
   }
+
+  const addPointListener = useEventEffect((e: MapBrowserEvent<any>) => {
+    if (!currentLine) return; //only add points to the selected line
+
+    const currLine = lines.find(ln => ln.lineid === currentLine)!;
+    const lonLat = toLonLat(e.coordinate);
+
+    if (editingPaths) {
+      //shape editor - add next point in the correct position
+      addPoint({
+        name: 'path-point',
+        lat: lonLat[1],
+        lng: lonLat[0],
+        pathid: currentPath!,
+        order: currentPoint || 0
+      });
+      setCurrentLine(undefined);
+    } else {
+      //stop editor - add stop to the list, order is not important
+      addStop({
+        name: 'additional-stop',
+        lat: lonLat[1],
+        lng: lonLat[0],
+        lineid: currLine.lineid,
+        request: false,
+      });
+      setCurrentLine(undefined);
+    }
+  });
+
+  useEffect(() => {
+    addClickAction(addPointListener);
+
+    return () => removeClickAction(addPointListener);
+  }, []);
 
   useEffect(() => {
     refreshLines();

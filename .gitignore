@@ -3,3 +3,4 @@ src/key.ts
 node_modules/*
 .vscode
 yarn-error.log
+.yalc/*
