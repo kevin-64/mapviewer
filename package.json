@@ -16,6 +16,7 @@
     "webpack-dev-server": "^4.15.1"
   },
   "scripts": {
+    "update": "yalc update",
     "start": "webpack serve --hot --open --no-client-overlay"
   },
   "dependencies": {

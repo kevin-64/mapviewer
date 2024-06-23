@@ -1,8 +1,10 @@
 import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import LineContextType, { LinePointRecord, LineRecord, LineWithPoints, PathPointRecord, PointRecord } from "./LineContextType";
 import LineContext from './LineContext';
+import { LineContext as LayerLineContext } from "ktsuilib";
 import axios from "axios";
 import { Line, LinePoint } from "ktscore";
+import { BACKEND_ADDRESS } from "../../config";
 
 export default function LineProvider(props: PropsWithChildren) {
   const [selectedLine, setSelectedLine] = useState<number | undefined>(undefined);
@@ -12,7 +14,7 @@ export default function LineProvider(props: PropsWithChildren) {
   const [lines, setLines] = useState<LineWithPoints[]>([]);
 
   const loadLines = async () => {
-    return axios.get('http://localhost:8080/lines').then((res) => {
+    return axios.get(`${BACKEND_ADDRESS}/lines`).then((res) => {
       setLines(res.data as LineWithPoints[]);
      });
   }
@@ -41,21 +43,21 @@ export default function LineProvider(props: PropsWithChildren) {
       },
 
       addLine: (ln: LineRecord) => {
-        axios.post('http://localhost:8080/lines', {
+        axios.post(`${BACKEND_ADDRESS}/lines`, {
           ...ln
         }).then(resp => {
           console.log(resp);
         });
       },
       updateLine: (ln: Line) => {
-        axios.put(`http://localhost:8080/lines/${ln.lineid}`, {
+        axios.put(`${BACKEND_ADDRESS}/lines/${ln.lineid}`, {
           ...ln
         }).then(resp => {
           console.log(resp);
         });
       },
       removeLine: (id: number) => {
-        axios.delete(`http://localhost:8080/lines/${id}`).then(resp => {
+        axios.delete(`${BACKEND_ADDRESS}/lines/${id}`).then(resp => {
           console.log(resp);
           if (selectedLine === id) setSelectedLine(undefined);
         });
@@ -75,7 +77,7 @@ export default function LineProvider(props: PropsWithChildren) {
       },
       addPoint: (pt: PathPointRecord & PointRecord) => {
         const selLine = selectedLine;
-        axios.post(`http://localhost:8080/lines/${selectedLine}/paths/${selectedPath}/points`, {
+        axios.post(`${BACKEND_ADDRESS}/lines/${selectedLine}/paths/${selectedPath}/points`, {
           ...pt,
         }).then(resp => {
           console.log(resp);
@@ -92,7 +94,7 @@ export default function LineProvider(props: PropsWithChildren) {
         });
       },
       updatePoint: (pt: LinePoint) => {
-        axios.patch(`http://localhost:8080/linepoints/${pt.linepointid}`, {
+        axios.patch(`${BACKEND_ADDRESS}/linepoints/${pt.linepointid}`, {
           ...pt
         }).then(resp => {
           console.log(resp);
@@ -102,7 +104,7 @@ export default function LineProvider(props: PropsWithChildren) {
         const selLine = selectedLine;
         const points = lines.find(ln => ln.lineid === selLine)?.paths.find(path => path.pathid === selectedPath)?.points;
         const indexToRemove = points!.findIndex(point => point.order === pos);
-        axios.delete(`http://localhost:8080/lines/${selLine}/paths/${selectedPath}/points/${pos}`).then(resp => {
+        axios.delete(`${BACKEND_ADDRESS}/lines/${selLine}/paths/${selectedPath}/points/${pos}`).then(resp => {
           console.log(resp);
 
           points!.splice(indexToRemove, 1);
@@ -114,7 +116,7 @@ export default function LineProvider(props: PropsWithChildren) {
 
       addStop: (stop: LinePointRecord) => {
         const lineId = stop.lineid;
-        axios.post(`http://localhost:8080/lines/${lineId}/points`, {
+        axios.post(`${BACKEND_ADDRESS}/lines/${lineId}/points`, {
           ...stop,
         }).then(resp => {
           console.log(resp);
@@ -124,7 +126,7 @@ export default function LineProvider(props: PropsWithChildren) {
         });
       },
       updateStop: (stop: LinePoint) => {
-        axios.patch(`http://localhost:8080/lines/${stop.lineid}/points/${stop.linepointid}`, {
+        axios.patch(`${BACKEND_ADDRESS}/lines/${stop.lineid}/points/${stop.linepointid}`, {
           ...stop
         }).then(resp => {
           console.log(resp);
@@ -133,7 +135,7 @@ export default function LineProvider(props: PropsWithChildren) {
       removeStop: (id: number) => {
         const selLine = lines.find(ln => ln.lineid === selectedLine)!
         const lineId = selLine.lineid;
-        axios.delete(`http://localhost:8080/lines/${lineId}/points/${id}`).then(resp => {
+        axios.delete(`${BACKEND_ADDRESS}/lines/${lineId}/points/${id}`).then(resp => {
           console.log(resp);
 
           const points = lines.find(ln => ln.lineid === lineId)?.points;
@@ -152,7 +154,7 @@ export default function LineProvider(props: PropsWithChildren) {
         const selLine = selectedLine;
         const lineId = lines.find(ln => ln.lineid === selLine)!.lineid;
         setSelectedLine(undefined);
-        axios.post(`http://localhost:8080/lines/${lineId}/paths`, {
+        axios.post(`${BACKEND_ADDRESS}/lines/${lineId}/paths`, {
           lineid: lineId
         }).then(resp => {
           console.log(resp);
@@ -165,7 +167,7 @@ export default function LineProvider(props: PropsWithChildren) {
         });
       },
       removePath: (pathid: number) => {
-        axios.delete(`http://localhost:8080/lines/${selectedLine}/paths/${pathid}`).then(resp => {
+        axios.delete(`${BACKEND_ADDRESS}/lines/${selectedLine}/paths/${pathid}`).then(resp => {
           console.log(resp);
           const paths = lines.find(ln => ln.lineid === selectedLine)!.paths;
           const pathIndex = paths.findIndex(p => p.pathid === pathid);
@@ -177,8 +179,10 @@ export default function LineProvider(props: PropsWithChildren) {
   }, [selectedLine, selectedPoint, selectedPath, lines, editPaths]);
 
   return (
-    <LineContext.Provider value={provider}>
-      {props.children}
-    </LineContext.Provider>
+      <LineContext.Provider value={provider}>
+        <LayerLineContext.Provider value={provider}>
+          {props.children}
+        </LayerLineContext.Provider>
+      </LineContext.Provider>
   )
 }
