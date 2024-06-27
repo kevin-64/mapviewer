@@ -1,4 +1,4 @@
-import { LineContext, LinesLayer } from "ktsuilib";
+import { Core, Map } from "ktsuilib";
 import { FeatureLike } from "ol/Feature";
 import Circle from "ol/style/Circle";
 import Fill from "ol/style/Fill";
@@ -13,7 +13,7 @@ function withOpacity (color: string, opacity: number) {
 }
 
 const LinesLayerWrapper = () => {
-  const { lines, currentLine } = useContext(LineContext)!;
+  const { lines, currentLine } = useContext(Core.LineContext)!;
 
   const getStyle = (feature: FeatureLike) => {
     const baseOpacity = currentLine != null ? 96 : 255;
@@ -56,7 +56,7 @@ const LinesLayerWrapper = () => {
   }
 
   return (
-    <LinesLayer styleFunction={getStyle} />
+    <Map.LinesLayer styleFunction={getStyle} />
   )
 };
 

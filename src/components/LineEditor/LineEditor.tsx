@@ -5,7 +5,7 @@ import ViewContext from "../../contexts/view/ViewContext";
 import PopupIds from "../../contexts/view/PopupIds";
 import LineContext from "../../contexts/line/LineContext";
 import { fromLonLat, toLonLat } from "ol/proj";
-import { MapStateContext } from 'ktsuilib';
+import { Map } from 'ktsuilib';
 import { MapBrowserEvent } from 'ol';
 import useEventEffect from '../../hooks/useEventEffect';
 
@@ -19,7 +19,7 @@ export default function LineEditor() {
           addPath, removePath, editingPaths, setEditingPaths,
           addStop, removeStop, 
           removeLine } = useContext(LineContext)!;
-  const { setCenter, addClickAction, removeClickAction } = useContext(MapStateContext)!;
+  const { setCenter, addClickAction, removeClickAction } = useContext(Map.MapStateContext)!;
   const [collapsed, setCollapsed] = useState(true);
 
   // console.log(lines);

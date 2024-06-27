@@ -1,7 +1,7 @@
 import React, { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import LineContextType, { LinePointRecord, LineRecord, LineWithPoints, PathPointRecord, PointRecord } from "./LineContextType";
 import LineContext from './LineContext';
-import { LineContext as LayerLineContext } from "ktsuilib";
+import { Core } from "ktsuilib";
 import axios from "axios";
 import { Line, LinePoint } from "ktscore";
 import { BACKEND_ADDRESS } from "../../config";
@@ -180,9 +180,9 @@ export default function LineProvider(props: PropsWithChildren) {
 
   return (
       <LineContext.Provider value={provider}>
-        <LayerLineContext.Provider value={provider}>
+        <Core.LineContext.Provider value={provider}>
           {props.children}
-        </LayerLineContext.Provider>
+        </Core.LineContext.Provider>
       </LineContext.Provider>
   )
 }
